@@ -3,7 +3,7 @@ var toolTip = d3.tip()
     .attr("class", "d3-tip")
     .offset([-12, 0])
     .html(function(d) {
-        return "<h5>"+d['name']+"</h5>";
+        return "<h5>"+d['State']+"</h5>";
     });
 
 var svg = d3.select('svg');
@@ -20,7 +20,7 @@ var cellPadding = 10;
 var chartG = svg.append('g')
     .attr('transform', 'translate('+[padding.l, padding.t]+')');
 
-var dataAttributes = ['economy (mpg)', 'cylinders', 'power (hp)', '0-60 mph (s)'];
+var dataAttributes = ['total population', 'revenue', 'federal aid', 'outstanding debt', 'per pupil salaries', 'per pupil employee benefits', 'average sat score', 'average act score', 'act % students tested', 'IEP per 1000', 'youth substance abuse per 100', 'high school diploma %', 'bachelor degree %', 'advanced degree %', 'school lunch students', 'school lunch reduced %'];
 var N = dataAttributes.length;
 
 // Compute chart dimensions
@@ -56,9 +56,9 @@ var brush = d3.brush()
     .on("end", brushend);
 
 
-d3.csv('cars.csv', dataPreprocessor).then(function(dataset) {
+d3.csv('education.csv', dataPreprocessor).then(function(dataset) {
     
-        cars = dataset;
+        //cars = dataset;
 
         // Create map for each attribute's extent
         dataAttributes.forEach(function(attribute){
@@ -104,70 +104,70 @@ d3.csv('cars.csv', dataPreprocessor).then(function(dataset) {
 
         // ********* Your data dependent code goes here *********//
         var cells = [];
-		dataAttributes.forEach(function(attrX, col){
-		    dataAttributes.forEach(function(attrY, row){
-		        cells.push(new SplomCell(attrX, attrY, col, row));
-    		});
-		});
-		console.log(cells);
+        dataAttributes.forEach(function(attrX, col){
+            dataAttributes.forEach(function(attrY, row){
+                cells.push(new SplomCell(attrX, attrY, col, row));
+            });
+        });
+        console.log(cells);
 
-		//initialize
-		SplomCell.prototype.init = function(g) {
-		    var cell = d3.select(g);
+        //initialize
+        SplomCell.prototype.init = function(g) {
+            var cell = d3.select(g);
 
-		    cell.append('rect')
-		      .attr('class', 'frame')
-		      .attr('width', cellWidth - cellPadding)
-		      .attr('height', cellHeight - cellPadding);
-		}
+            cell.append('rect')
+              .attr('class', 'frame')
+              .attr('width', cellWidth - cellPadding)
+              .attr('height', cellHeight - cellPadding);
+        }
 
-		//update cell based on incoming data
-		SplomCell.prototype.update = function(g, data) {
-		    var cell = d3.select(g);
+        //update cell based on incoming data
+        SplomCell.prototype.update = function(g, data) {
+            var cell = d3.select(g);
 
-		    // Update the global x,yScale objects for this cell's x,y attribute domains
-		    xScale.domain(extentByAttribute[this.x]);
-		    yScale.domain(extentByAttribute[this.y]);
+            // Update the global x,yScale objects for this cell's x,y attribute domains
+            xScale.domain(extentByAttribute[this.x]);
+            yScale.domain(extentByAttribute[this.y]);
 
-		    // Save a reference of this SplomCell, to use within anon function scopes
-		    var _this = this;
+            // Save a reference of this SplomCell, to use within anon function scopes
+            var _this = this;
 
-		    var dots = cell.selectAll('.dot')
-		        .data(data, function(d){
-		            return d.name +'-'+d.year+'-'+d.cylinders; // Create a unique id for the car
-		        });
+            var dots = cell.selectAll('.dot')
+                .data(data, function(d){
+                    return d.name +'-'+d.year+'-'+d.cylinders; // Create a unique id for the car
+                });
 
-		    var dotsEnter = dots.enter()
-		        .append('circle')
-		        .attr('class', 'dot')
-		        .style("fill", function(d) { return colorScale(d.cylinders); })
-		        .attr('r', 4);
+            var dotsEnter = dots.enter()
+                .append('circle')
+                .attr('class', 'dot')
+                .style("fill", function(d) { return colorScale(d.cylinders); })
+                .attr('r', 4);
 
-		    dots.merge(dotsEnter).attr('cx', function(d){
-		            return xScale(d[_this.x]);
-		        })
-		        .attr('cy', function(d){
-		            return yScale(d[_this.y]);
-		        });
+            dots.merge(dotsEnter).attr('cx', function(d){
+                    return xScale(d[_this.x]);
+                })
+                .attr('cy', function(d){
+                    return yScale(d[_this.y]);
+                });
             //tooltip
             dotsEnter.on('mouseover', toolTip.show)
                 .on('mouseout', toolTip.hide);
 
-		    dots.exit().remove();
-		}
+            dots.exit().remove();
+        }
 
-		//drawing the cells
-		var cellEnter = chartG.selectAll('.cell')
-    		.data(cells)
-		    .enter()
-		    .append('g')
-		    .attr('class', 'cell')
-		    .attr("transform", function(d) {
-		        // Start from the far right for columns to get a better looking chart
-		        var tx = (N - d.col - 1) * cellWidth + cellPadding / 2;
-		        var ty = d.row * cellHeight + cellPadding / 2;
-		        return "translate("+[tx, ty]+")";
-		});
+        //drawing the cells
+        var cellEnter = chartG.selectAll('.cell')
+            .data(cells)
+            .enter()
+            .append('g')
+            .attr('class', 'cell')
+            .attr("transform", function(d) {
+                // Start from the far right for columns to get a better looking chart
+                var tx = (N - d.col - 1) * cellWidth + cellPadding / 2;
+                var ty = d.row * cellHeight + cellPadding / 2;
+                return "translate("+[tx, ty]+")";
+        });
 
         cellEnter.append('g')
             .attr('class', 'brush')
@@ -177,10 +177,10 @@ d3.csv('cars.csv', dataPreprocessor).then(function(dataset) {
             cell.init(this);
             cell.update(this, dataset);
         });
-   		
+        
     });
 
-// ********* Your event listener functions go here *********//
+// *********Event listener functions go here *********//
 function brushstart(cell) {
     // cell is the SplomCell object
 
@@ -230,13 +230,21 @@ function brushend() {
 
 function dataPreprocessor(row) {
     return {
-        'name': row['name'],
-        'economy (mpg)': +row['economy (mpg)'],
-        'cylinders': +row['cylinders'],
-        'displacement (cc)': +row['displacement (cc)'],
-        'power (hp)': +row['power (hp)'],
-        'weight (lb)': +row['weight (lb)'],
-        '0-60 mph (s)': +row['0-60 mph (s)'],
-        'year': +row['year']
+        'total population': row['total_population'],
+        'revenue': +row['total_revenue'],
+        'federal aid': +row['total_federal_aid'],
+        'outstanding debt': +row['total_outstanding_debt'],
+        'per pupil salaries': +row['per_pupil_salaries'],
+        'per pupil employee benefits': +row['per_pupil_employee_benefits'],
+        'average sat score': +row['sat_average_score'],
+        'average act score': +row['avg_act_composite_score'],
+        'act % students tested': +row['act_percent_students_tested'],
+        'IEP per 1000': +row['IEP_per_1000'],
+        'youth substance abuse per 100': +row['youth_substance_use_per_100'],
+        'high school diploma %': +row['educational_attainment_hs_plus'],
+        'bachelor degree %': +row['educational_attainment_bachelor_plus'],
+        'advanced degree %': +row['educational_attainment_advanced_degree_plus'],
+        'school lunch students': +row['school_lunches_num_students_enrolled'],
+        'school lunch reduced %': +row['school_lunches_percent_students_free_lunch']
     };
 }
