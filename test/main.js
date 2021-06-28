@@ -1,7 +1,7 @@
     let data = [];
-    let features = ["A","B","C","D","E","F"];
+    let features = ["% HS","% College", "% Higher Ed"];
     //generate the data
-    for (var i = 0; i < 3; i++){
+    for (var i = 0; i < 1; i++){
         var point = {}
         //each feature will be a random number from 1-9
         features.forEach(f => point[f] = 1 + Math.random() * 8);
@@ -10,34 +10,34 @@
     console.log(data);
 
     let svg = d3.select("body").append("svg")
-    .attr("width", 600)
+    .attr("width", 1000)
     .attr("height", 600);
 
     let radialScale = d3.scaleLinear()
     .domain([0,10])
-    .range([0,250]);
-    let ticks = [2,4,6,8,10];
+    .range([0,50]);
+    let ticks = [5, 10];
 
     ticks.forEach(t =>
     svg.append("circle")
-    .attr("cx", 300)
-    .attr("cy", 300)
+    .attr("cx", 100)
+    .attr("cy", 100)
     .attr("fill", "none")
     .attr("stroke", "gray")
     .attr("r", radialScale(t))
     );
 
-    ticks.forEach(t =>
-    svg.append("text")
-    .attr("x", 305)
-    .attr("y", 300 - radialScale(t))
-    .text(t.toString())
-    );
+    // ticks.forEach(t =>
+    // svg.append("text")
+    // .attr("x", 305)
+    // .attr("y", 300 - radialScale(t))
+    // .text(t.toString())
+    // );
 
     function angleToCoordinate(angle, value){
     let x = Math.cos(angle) * radialScale(value);
     let y = Math.sin(angle) * radialScale(value);
-    return {"x": 300 + x, "y": 300 - y};
+    return {"x": 100 + x, "y": 100 - y};
     }
 
     for (var i = 0; i < features.length; i++) {
@@ -48,17 +48,17 @@
 
     //draw axis line
     svg.append("line")
-    .attr("x1", 300)
-    .attr("y1", 300)
+    .attr("x1", 100)
+    .attr("y1", 100)
     .attr("x2", line_coordinate.x)
     .attr("y2", line_coordinate.y)
     .attr("stroke","black");
 
     //draw axis label
-    svg.append("text")
-    .attr("x", label_coordinate.x)
-    .attr("y", label_coordinate.y)
-    .text(ft_name);
+    // svg.append("text")
+    // .attr("x", label_coordinate.x)
+    // .attr("y", label_coordinate.y)
+    // .text(ft_name);
     }
 
     let line = d3.line()
