@@ -15,20 +15,21 @@ for (var i = 0; i < 1; i++){
 console.log(data);
 
 //Read the dab
-d3.csv("https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/5_OneCatSevNumOrdered.csv", function(dab) {
+// d3.csv("https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/5_OneCatSevNumOrdered.csv", function(dab) {
+d3.csv('education.csv', function(dab) {
 
   // group the dab: I want to draw one line per group
-  var sumstat = d3.nest() // nest function allows to group the calculation per level of a factor
-    .key(function(d) { return d.name;})
+  var nested = d3.nest() // nest function allows to group the calculation per level of a factor
+    .key(function(d) { return d.State;})
     .entries(dab);
 
   // What is the list of groups?
-  allKeys = sumstat.map(function(d){return d.key})
+  allKeys = nested.map(function(d){return d.key})
 
   // Add an svg element for each group. They will be side by side and will go next row when no more room available
   var svg = d3.select("#my_dataviz")
     .selectAll("uniqueChart")
-    .data(sumstat)
+    .data(nested)
     .enter()
     .append("svg")
       .attr("width", width + margin.left + margin.right)
@@ -116,7 +117,13 @@ svg.append("path")
 .attr("opacity", 0.5);
 }
 
-
-
-
+// Add titles
+svg
+  .append("text")
+  .attr("text-anchor", "start")
+  .attr("y", 25)
+  .attr("x", 10)
+  .text(function(d){ return(d.key)})
+  // .style("fill", function(d){ return color(d.key) })
+  
 })
