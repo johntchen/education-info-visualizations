@@ -1,36 +1,9 @@
-<!DOCTYPE HTML>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Education Stats</title>
-    <link rel="stylesheet" href="./style.css">
-</head>
-<body>
-    <div id="main">
-        <svg width="2500" height="2500" style="border: 1px solid #777;">
-        </svg>
-        <b>Color by:</b>
-        <select id="colorAttrSelector">
-        	<option value="total population">total population</option>
-        	<option value="revenue">revenue</option>
-            <option value="federal aid">federal aid</option>
-            <option value="outstanding debt">outstanding debt</option>
-            <option value="per pupil salaries">per pupil salaries</option>
-            <option value="per pupil employee benefits">per pupil employee benefits</option>
-        	<option value="average sat score">average sat score</option>
-            <option value="average act score">average act score</option>
-            <option value="act % students tested">act % students tested</option>
-            <option value="IEP per 1000">IEP per 1000</option>
-            <option value="youth substance abuse per 100">youth substance abuse per 100</option>
-            <option value="high school diploma %">high school diploma %</option>
-            <option value="bachelor degree %">bachelor degree %</option>
-            <option value="advanced degree %">advanced degree %</option>
-            <option value="school lunch students">school lunch students</option>
-            <option value="school lunch free/discount %">school lunch free/discount %</option>
-        </select>  
-    </div>
-</body>
-<script src="//d3js.org/d3.v5.min.js"></script>
-<script src="./d3-tip.js"></script>
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<!-- Load d3.js -->
+<script src="https://d3js.org/d3.v4.js"></script>
 <script src="./main.js"></script>
-</html>
+
+<!-- Create a div where the graph will take place -->
+<div id="my_dataviz"></div>
