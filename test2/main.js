@@ -4,17 +4,9 @@ var margin = {top: 30, right: 0, bottom: 30, left: 30},
     height = 200 - margin.top - margin.bottom;
 
 //Read the dab
-// d3.csv("https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/5_OneCatSevNumOrdered.csv", function(dab) {
 d3.csv('education.csv', function(dab) {
 
-  let data = [{"% College": 4,
-    "% HS": 4,
-    "% Higher Ed": 7,
-    "Funding": 2},
-    {"% College": 1,
-    "% HS": 1,
-    "% Higher Ed": 8,
-    "Funding": 5}];
+  let data = [{"% College": 4, "% HS": 4, "% Higher Ed": 7, "Funding": 2}];
   // let data = [];
   let features = ["% HS","% College", "% Higher Ed", "Funding"];
   // let features = ["act_percent_students_tested","act_percent_students_tested", "act_percent_students_tested", "act_percent_students_tested"];
@@ -29,22 +21,6 @@ d3.csv('education.csv', function(dab) {
   // }
   console.log(data);
   console.log(dab);
-  // console.log(dab.act_percent_students_tested);
-  // for (i = 0; i < dab.length; i++) {
-  //   console.log(i);
-  //   console.log(data[i].act_percent_students_tested);
-  // }
-  // var val = dab.map(x => Object.values(x));
-  // console.log(val[0][0]);
-
-  // console.log(function(d) {
-  //   return {date: d.date, temperature: +d[name]}
-  // });
-
-  // var allGroup = d3.map(data, function(d){return(d.State)}).keys()
-  // console.log(allGroup);
-
-  // console.log(dab.columns);
   
   // group the dab: I want to draw one line per group
   var nested = d3.nest() // nest function allows to group the calculation per level of a factor
@@ -55,6 +31,7 @@ d3.csv('education.csv', function(dab) {
 
   // What is the list of groups?
   allKeys = nested.map(function(d){return d.key})
+  // console.log(allKeys);
 
   // Add an svg element for each group. They will be side by side and will go next row when no more room available
   var svg = d3.select("#my_dataviz")
@@ -65,14 +42,11 @@ d3.csv('education.csv', function(dab) {
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
     .append("g")
-      .attr("transform",
-            "translate(" + margin.left + "," + margin.top + ")");
-    //   .text(function (d, i) {
-    //     console.log(d.values[0]["act_percent_students_tested"]/10); // the data element
-    //     // console.log(i); // the index element
-    //     // console.log(this); // the current DOM object
-    //     // return d.key;
-    // });
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+      // .each(function(d){
+      //   console.log(d);
+      // })
+
 
   // calculates radial stuff? or just a normie scale
   let radialScale = d3.scaleLinear()
@@ -128,7 +102,7 @@ d3.csv('education.csv', function(dab) {
     // .text(ft_name);
   }
 
-  // some setup for special line ?
+  // some setup for axis line ?
   let line = d3.line()
   .x(d => d.x)
   .y(d => d.y);
@@ -140,40 +114,31 @@ d3.csv('education.csv', function(dab) {
     let coordinates = [];
     for (var i = 0; i < features.length; i++){
         let ft_name = features[i];
+        console.log(data_point);
         let angle = (Math.PI / 2) + (2 * Math.PI * i / features.length);
         coordinates.push(angleToCoordinate(angle, data_point[ft_name]));
     }
+    console.log(coordinates);
     return coordinates;
   }
 
-  // iterate through the data and draw the vis
-  // for (var i = 0; i < data.length; i++){
-  //   let d = data[i];
-    console.log(dab[0]);
-
-    //draw the path element
-    svg.append("path")
-    // .text(function (d, i) {
-    //   console.log(d.values[0]["act_percent_students_tested"]/10); // the data element
-      // console.log(i); // the index element
-      // console.log(this); // the current DOM object
-      // return d.key;
-    // })
-    .datum(getPathCoordinates(data[0]))
-    // .datum(getPathCoordinates(function(d) {
-    //   console.log(d.values); // the data element
-    //   return (data[0]);
-    // }))
-    // .datum(getPathCoordinates(function(d) {
-    //   return (d[0]);
-    // })
-    .attr("d", line)
-    .attr("stroke-width", 3)
-    .attr("stroke", colors[0])
-    .attr("fill", colors[0])
-    .attr("stroke-opacity", 1)
-    .attr("opacity", 0.5);
-  // }
+  // draw the vis
+  svg.append("path")
+  // .each(function(d){
+  //   console.log(d.values);
+  // })
+  .datum(getPathCoordinates(data[0]))// links the data
+  // .datum(getPathCoordinates(d.values))// links the data
+  // .attr("d", function(d) {
+  //   console.log(d.values);
+  //   return ("M100, 80 L80, 100 L100, 135 L110, 100");
+  // })
+  .attr("d", line)
+  .attr("stroke-width", 3)
+  .attr("stroke", colors[0])
+  .attr("fill", colors[0])
+  .attr("stroke-opacity", 1)
+  .attr("opacity", 0.5);
 
   // Add titles
   svg
