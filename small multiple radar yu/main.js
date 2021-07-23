@@ -4,10 +4,8 @@ var margin = {top: 30, right: 0, bottom: 30, left: 30},
     height = 200 - margin.top - margin.bottom;
 
 //Read the dab
-// d3.csv("https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/5_OneCatSevNumOrdered.csv", function(dab) {
 d3.csv('education.csv', function(dab) {
 
-  // let features = ["educational_attainment_hs_plus","educational_attainment_hs_plus", "educational_attainment_hs_plus", "educational_attainment_hs_plus"];
   let features = ["educational_attainment_hs_plus","educational_attainment_bachelor_plus", "educational_attainment_advanced_degree_plus"];
   console.log(dab);
 
@@ -15,10 +13,6 @@ d3.csv('education.csv', function(dab) {
     .key(function(d) { return d.State;})
     .entries(dab);
 
-  // What is the list of groups?
-
-
-  // console.log(nested);
   allKeys = nested.map(function(d){return d.key})
 
   // Add an svg element for each group. They will be side by side and will go next row when no more room available
@@ -38,8 +32,7 @@ d3.csv('education.csv', function(dab) {
   .domain([0,10])
   .range([0,50]);
 
-  // where are the rings
-  let ticks = [5, 10];
+  let ticks = [5, 10];  // rings at 50 % & 10 %
 
   // draws rings
   ticks.forEach(t =>
@@ -50,14 +43,6 @@ d3.csv('education.csv', function(dab) {
   .attr("stroke", "gray")
   .attr("r", radialScale(t))
   );
-
-  // // have no use for now
-  // ticks.forEach(t =>
-  // svg.append("text")
-  // .attr("x", 305)
-  // .attr("y", 300 - radialScale(t))
-  // .text(t.toString())
-  // );
 
   // calculates coordinate based on angle
   function angleToCoordinate(angle, value){
@@ -135,5 +120,4 @@ d3.csv('education.csv', function(dab) {
   .attr("x", 10)
   .text(function(d){ return(d.key)})
   // .style("fill", function(d){ return color(d.key) })
-
 })
