@@ -6,8 +6,30 @@ var margin = {top: 30, right: 0, bottom: 30, left: 30},
 //Read the dab
 d3.csv('education.csv', function(dab) {
 
-  let features = ["educational_attainment_hs_plus","educational_attainment_bachelor_plus", "educational_attainment_advanced_degree_plus"];
+  let features = ["adjusted_perpupil_spending","school_lunches_percent_students_free_lunch", "educational_attainment_advanced_degree_plus", "avg_act_composite_score"];
   console.log(dab);
+
+  for (var i = 0; i < features.length; i++) {
+    let ft_name = features[i];
+    console.log(ft_name);
+
+    let temp = dab.map(d=> parseFloat(d[ft_name]));
+    console.log(temp);
+
+    let ext = d3.extent(temp);
+    console.log(ext);
+
+    let scl = d3.scaleLinear()
+    .domain(ext)
+    .range([0, 10]);
+
+    let juice = temp.map(d => scl(d));
+    console.log(juice);
+
+    for (var j = 0; j < dab.length; j++) {
+      dab[j][ft_name] = juice[j];
+    }
+  }
 
   var nested = d3.nest() // maybe not neccesary 
     .key(function(d) { return d.State;})
@@ -27,11 +49,23 @@ d3.csv('education.csv', function(dab) {
       .attr("transform",
             "translate(" + margin.left + "," + margin.top + ")");
 
-  // calculates radial stuff? or just a normie scale
-  let radialScale = d3.scaleLinear()
-  .domain([0,10])
-  .range([0,50]);
+  // calculates the size of the radars
+  let radarSizeScale = d3.scaleLinear()
+  .domain([0,1])
+  .range([0,6]);
+  
+  // let radarSizeScale = d3.scaleLinear()
+  // .domain(d3.extent(dab, d => d))
+  // .range([0,50]);
 
+  let dabScale = d3.scaleLinear()
+  .domain(d3.extent([0, 100]))
+  .range([0, 10]);
+
+  // let dabScale = d3.scaleLinear()
+  // .domain(d3.extent(dab, d => ft_name[d]))
+  // .range([0, 10]);
+  
   let ticks = [5, 10];  // rings at 50 % & 10 %
 
   // draws rings
@@ -41,13 +75,13 @@ d3.csv('education.csv', function(dab) {
   .attr("cy", 100)
   .attr("fill", "none")
   .attr("stroke", "gray")
-  .attr("r", radialScale(t))
+  .attr("r", radarSizeScale(t))
   );
 
   // calculates coordinate based on angle
   function angleToCoordinate(angle, value){
-    let x = Math.cos(angle) * radialScale(value);
-    let y = Math.sin(angle) * radialScale(value);
+    let x = Math.cos(angle) * radarSizeScale(value);
+    let y = Math.sin(angle) * radarSizeScale(value);
     return {"x": 100 + x, "y": 100 - y};
   }
 
@@ -70,7 +104,7 @@ d3.csv('education.csv', function(dab) {
     // .text(ft_name);
   }
 
-  // some setup for special line ?
+  // some setup for actual vis
   let line = d3.line()
   .x(d => d.x)
   .y(d => d.y);
@@ -88,29 +122,26 @@ d3.csv('education.csv', function(dab) {
 
 
         // console.log(ft_name);
-        console.log(data_point[ft_name]);
-        coordinates.push(angleToCoordinate(angle, data_point[ft_name]/10));
+        // console.log(data_point[ft_name]);
+        coordinates.push(angleToCoordinate(angle, data_point[ft_name]));
+        // coordinates.push(angleToCoordinate(angle, dabScale(data_point[ft_name])));
     }
 
     // console.log(coordinates);
     return coordinates;
   }
 
-  // iterate through the data and draw the vis
-    // console.log(dab[0]);
 
-    //draw the path element
+  //draw the path element
+  svg.append("path")
+  .datum((d,i) => getPathCoordinates(nested[i].values[0]))
+  .attr("d", line)
+  .attr("stroke-width", 3)
+  .attr("stroke", colors[0])
+  .attr("fill", colors[0])
+  .attr("stroke-opacity", 1)
+  .attr("opacity", 0.5);
 
-    // console.log(nested[0]);
-    svg.append("path")
-    .datum((d,i) => getPathCoordinates(nested[i].values[0]))
-    .attr("d", line)
-    .attr("stroke-width", 3)
-    .attr("stroke", colors[0])
-    .attr("fill", colors[0])
-    .attr("stroke-opacity", 1)
-    .attr("opacity", 0.5);
-  // }
 
   // Add titles
   svg
