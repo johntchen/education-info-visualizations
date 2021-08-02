@@ -3,8 +3,10 @@ var toolTip = d3.tip()
     .attr("class", "d3-tip")
     .offset([-12, 0])
     .html(function(d) {
-        return "<h5>"+d['State']+"</h5>";
+        return "<h5>"+d['state']+"</h5>";
     });
+
+var content = document.getElementById('main');
 
 var svg = d3.select('svg');
 svg.call(toolTip);
@@ -33,8 +35,6 @@ var yScale = d3.scaleLinear().range([cellHeight - cellPadding, 0]);
 // axes that are rendered already for you
 var xAxis = d3.axisTop(xScale).ticks(6).tickSize(-cellHeight * N, 0, 0);
 var yAxis = d3.axisLeft(yScale).ticks(6).tickSize(-cellWidth * N, 0, 0);
-// Ordinal color scale for cylinders color mapping
-var colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 // Map for referencing min/max per each attribute
 var extentByAttribute = {};
 // Object for keeping state of which cell is currently being brushed
@@ -63,9 +63,13 @@ d3.csv('education.csv', dataPreprocessor).then(function(dataset) {
         // Create map for each attribute's extent
         dataAttributes.forEach(function(attribute){
             extentByAttribute[attribute] = d3.extent(dataset, function(d){
+
+                console.log(attribute);
+                console.log(d[attribute]);
                 return d[attribute];
             });
         });
+
 
         // Pre-render gridlines and labels
         chartG.selectAll('.x.axis')
@@ -79,11 +83,12 @@ d3.csv('education.csv', dataPreprocessor).then(function(dataset) {
             .each(function(attribute){
                 xScale.domain(extentByAttribute[attribute]);
                 d3.select(this).call(xAxis);
-                d3.select(this).append('text')
+                var labelx = d3.select(this).append('text')
                     .text(attribute)
                     .attr('class', 'axis-label')
                     .attr('transform', 'translate('+[cellWidth / 2, -20]+')');
             });
+
         chartG.selectAll('.y.axis')
             .data(dataAttributes)
             .enter()
@@ -95,21 +100,28 @@ d3.csv('education.csv', dataPreprocessor).then(function(dataset) {
             .each(function(attribute){
                 yScale.domain(extentByAttribute[attribute]);
                 d3.select(this).call(yAxis);
-                d3.select(this).append('text')
+                var labely = d3.select(this).append('text')
                     .text(attribute)
                     .attr('class', 'axis-label')
                     .attr('transform', 'translate('+[-26, cellHeight / 2]+')rotate(270)');
             });
 
+        // fixed scrolling
+        content.addEventListener('scroll', function(evt) {
+            labelx.node().setAttribute('x', 10 + this.scrollTop);
+        }, false);
+        content.addEventListener('scroll', function(evt) {
+            labely.node().setAttribute('y', 10 + this.scrollLeft);
+        }, false);
 
-        // ********* Your data dependent code goes here *********//
+
+        // ********* data dependent code *********//
         var cells = [];
         dataAttributes.forEach(function(attrX, col){
             dataAttributes.forEach(function(attrY, row){
                 cells.push(new SplomCell(attrX, attrY, col, row));
             });
         });
-        console.log(cells);
 
         //initialize
         SplomCell.prototype.init = function(g) {
@@ -134,13 +146,26 @@ d3.csv('education.csv', dataPreprocessor).then(function(dataset) {
 
             var dots = cell.selectAll('.dot')
                 .data(data, function(d){
-                    return d.name +'-'+d.year+'-'+d.cylinders; // Create a unique id for the car
+                    return d.state +'-'+d.region; // Create a unique id for the car
                 });
 
             var dotsEnter = dots.enter()
                 .append('circle')
                 .attr('class', 'dot')
-                .style("fill", function(d) { return colorScale(d.cylinders); })
+                .attr('id', function(d) { return d.region; })
+                .style("fill", function(d) {
+                    if (d.region === 'Northeast') {
+                        return '#5bc0de';
+                    } else if (d.region === 'South') {
+                        return '#d9534f';
+                    } else if (d.region === 'Midwest') {
+                        return '#5cb85c';
+                    } else if (d.region === 'West') {
+                        return '#800080';
+                    } else {
+                        return 'fffffff';
+                    }
+                })
                 .attr('r', 4);
 
             dots.merge(dotsEnter).attr('cx', function(d){
@@ -162,7 +187,7 @@ d3.csv('education.csv', dataPreprocessor).then(function(dataset) {
             .enter()
             .append('g')
             .attr('class', 'cell')
-            .attr("transform", function(d) {
+            .attr('transform', function(d) {
                 // Start from the far right for columns to get a better looking chart
                 var tx = (N - d.col - 1) * cellWidth + cellPadding / 2;
                 var ty = d.row * cellHeight + cellPadding / 2;
@@ -177,7 +202,6 @@ d3.csv('education.csv', dataPreprocessor).then(function(dataset) {
             cell.init(this);
             cell.update(this, dataset);
         });
-        
     });
 
 // *********Event listener functions go here *********//
@@ -208,8 +232,8 @@ function brushmove(cell) {
 
         // Select all .dot circles, and add the "hidden" class if the data for that circle
         // lies outside of the brush-filter applied for this SplomCells x and y attributes
-        svg.selectAll(".dot")
-            .classed("hidden", function(d){
+        svg.selectAll('.dot')
+            .classed('hidden', function(d){
                 return e[0][0] > xScale(d[cell.x]) || xScale(d[cell.x]) > e[1][0]
                     || e[0][1] > yScale(d[cell.y]) || yScale(d[cell.y]) > e[1][1];
             })
@@ -226,25 +250,37 @@ function brushend() {
     }
 }
 
+function regionselect(region) {
+    if (region === 'Reset') {
+        svg.selectAll('.hidden').classed('hidden', false);
+    } else {
+        svg.selectAll('.hidden').classed('hidden', false);
+        svg.selectAll('*:not(#' + region + ')').classed('hidden', true);
+    }
+}
+
 // Remember code outside of the data callback function will run before the data loads
 
 function dataPreprocessor(row) {
+
     return {
-        'total population': row['total_population'],
-        'revenue': +row['total_revenue'],
-        'federal aid': +row['total_federal_aid'],
-        'outstanding debt': +row['total_outstanding_debt'],
-        'per pupil salaries': +row['per_pupil_salaries'],
-        'per pupil employee benefits': +row['per_pupil_employee_benefits'],
-        'average sat score': +row['sat_average_score'],
-        'average act score': +row['avg_act_composite_score'],
-        'act % students tested': +row['act_percent_students_tested'],
-        'IEP per 1000': +row['IEP_per_1000'],
-        'youth substance abuse per 100': +row['youth_substance_use_per_100'],
-        'high school diploma %': +row['educational_attainment_hs_plus'],
-        'bachelor degree %': +row['educational_attainment_bachelor_plus'],
-        'advanced degree %': +row['educational_attainment_advanced_degree_plus'],
-        'school lunch students': +row['school_lunches_num_students_enrolled'],
-        'school lunch reduced %': +row['school_lunches_percent_students_free_lunch']
+        'state': row['State'],
+        'region': row['Region'],
+        'total population': parseFloat(row['total_population']),
+        'revenue': parseFloat(row['total_revenue']),
+        'federal aid': parseFloat(row['total_federal_aid']),
+        'outstanding debt': parseFloat(row['outstanding_debt']),
+        'per pupil salaries': parseFloat(row['per_pupil_salaries']),
+        'per pupil employee benefits': parseFloat(row['per_pupil_employee_benefits']),
+        'average sat score': parseFloat(row['sat_average_score']),
+        'average act score': parseFloat(row['avg_act_composite_score']),
+        'act % students tested': parseFloat(row['act_percent_students_tested']),
+        'IEP per 1000': parseFloat(row['IEP_per_1000']),
+        'youth substance abuse per 100': parseFloat(row['youth_substance_use_per_100']),
+        'high school diploma %': parseFloat(row['educational_attainment_hs_plus']),
+        'bachelor degree %': parseFloat(row['educational_attainment_bachelor_plus']),
+        'advanced degree %': parseFloat(row['educational_attainment_advanced_degree_plus']),
+        'school lunch students': parseFloat(row['school_lunches_num_students_enrolled']),
+        'school lunch reduced %': parseFloat(row['school_lunches_percent_students_free_lunch'])
     };
 }
