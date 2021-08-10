@@ -12,10 +12,11 @@
 }
 
 .axis .axis-label {
-  font-size: 11px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px;
   font-weight: 600;
   text-anchor: middle;
-  fill: #555;
+  fill: #222;
 }
 
 .frame {
@@ -78,16 +79,61 @@ circle:hover {
   font-weight: 600;
 }
 
+.content {
+  height: 224px;
+  overflow: auto;
+  background: #FFFFFF;
+}
+
 .d3-tip td {
   padding: 2px 10px 2px 2px;
 }
 
 .d3-tip thead tr {
-  paddin-top: 10px;
+  padding-top: 10px;
+}
+
+.legendtitle {
+  font-family: 'Montserrat', sans-serif;
+  color: #000;
+  margin: 0;
+}
+
+.legend {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  color: #555;
+  display: flex;
+  margin-right: 20px;
+}
+
+.legend div {
+  margin-right: 20px;
+  min-width: 75px;
+}
+
+.dot {
+  height: 25px;
+  width: 25px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.legend h3 {
+  display: table;
+  margin:0 auto;
+}
+
+.legend span {
+  display: table;
+  margin:0 auto;
+  margin-top: 5px;
+  margin-bottom: 20px;
 }
 
 body {
-    font-family: "Open Sans";
+    font-family: 'Montserrat', sans-serif;
     margin: 0;
 }
 
