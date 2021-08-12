@@ -4,56 +4,118 @@ var margin = {top: 30, right: 0, bottom: 30, left: 30},
     height = 200 - margin.top - margin.bottom;
 
 //Read the dab
-// d3.csv("https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/5_OneCatSevNumOrdered.csv", function(dab) {
+// d3.csv('education.csv', dataPreprocessor).then(function(dab) {
 d3.csv('education.csv', function(dab) {
 
-  let data = [{"% College": 4,
-    "% HS": 4,
-    "% Higher Ed": 7,
-    "Funding": 2},
-    {"% College": 1,
-    "% HS": 1,
-    "% Higher Ed": 8,
-    "Funding": 5}];
-  // let data = [];
-  let features = ["% HS","% College", "% Higher Ed", "Funding"];
-  // let features = ["act_percent_students_tested","act_percent_students_tested", "act_percent_students_tested", "act_percent_students_tested"];
-  //generate the dummy data
-  // for(var j = 0; j < 2; j++) {
-    // for (var i = 0; i < 1; i++){
-    //     var point = {}
-    //     //each feature will be a random number from 1-9
-    //     features.forEach(f => point[f] = 1 + Math.random() * 8);
-    //     data.push(point);
-    // }
-  // }
-  console.log(data);
+  // dab = map.remove("National");
+
+  let features = ["school_lunches_percent_students_free_lunch", "school_lunches_percent_students_free_lunch", "school_lunches_percent_students_free_lunch", "school_lunches_percent_students_free_lunch", "school_lunches_percent_students_free_lunch"];
   console.log(dab);
-  // console.log(dab.act_percent_students_tested);
-  // for (i = 0; i < dab.length; i++) {
-  //   console.log(i);
-  //   console.log(data[i].act_percent_students_tested);
-  // }
-  // var val = dab.map(x => Object.values(x));
-  // console.log(val[0][0]);
 
-  // console.log(function(d) {
-  //   return {date: d.date, temperature: +d[name]}
-  // });
+  // functions --------------------------------------------------------------------------------------------
+  function scaleFeatures() {
+    for (var i = 0; i < features.length; i++) {
+      let ft_name = features[i];
+      // console.log(ft_name);
 
-  // var allGroup = d3.map(data, function(d){return(d.State)}).keys()
-  // console.log(allGroup);
+      let temp = dab.map(d=> parseFloat(d[ft_name]));
+      // console.log(temp);
 
-  // console.log(dab.columns);
+      let ext = d3.extent(temp);
+      // console.log(ext);
+
+      let scl = d3.scaleLinear()
+      .domain(ext)
+      .range([0, 10]);
+
+      let juice = temp.map(d => scl(d));
+      // console.log(juice);
+
+      for (var j = 0; j < dab.length; j++) {
+        dab[j][ft_name] = juice[j];
+      }
+    }
+  }
+
+    // calculates path coordinates
+    function getPathCoordinates(data_point){
+
+      // console.log(data_point);
+      let coordinates = [];
+      for (var i = 0; i < features.length; i++){
+          let ft_name = features[i];
+          let angle = (Math.PI / 2) + (2 * Math.PI * i / features.length);
   
-  // group the dab: I want to draw one line per group
-  var nested = d3.nest() // nest function allows to group the calculation per level of a factor
+  
+          // console.log(ft_name);
+          // console.log(data_point[ft_name]);
+          coordinates.push(angleToCoordinate(angle, data_point[ft_name]));
+          // coordinates.push(angleToCoordinate(angle, dabScale(data_point[ft_name])));
+      }
+  
+      // console.log(coordinates);
+      return coordinates;
+    }
+
+    // calculates coordinate based on angle
+    function angleToCoordinate(angle, value){
+      let x = Math.cos(angle) * radarSizeScale(value);
+      let y = Math.sin(angle) * radarSizeScale(value);
+      return {"x": 100 + x, "y": 100 - y};
+    }
+
+    function draw(){
+      d3.selectAll("#graphie").remove();
+      
+      //draw the path element
+      svg.append("path")
+      .datum((d,i) => getPathCoordinates(nested[i].values[0]))
+      .attr("d", line)
+      .attr("stroke-width", 3)
+      .attr("stroke", colors[0])
+      .attr("fill", colors[0])
+      .attr("stroke-opacity", 1)
+      .attr("opacity", 0.5)
+      .attr("id", "graphie")
+      .transition()
+      .duration(1000);
+      
+      // draw all axis lines
+      for (var i = 0; i < features.length; i++) {
+        let angle = (Math.PI / 2) + (2 * Math.PI * i / features.length);
+        let line_coordinate = angleToCoordinate(angle, 10);
+        let label_coordinate = angleToCoordinate(angle, 10.5);
+        
+        svg.append("line")
+        .attr("x1", 100)
+        .attr("y1", 100)
+        .attr("x2", line_coordinate.x)
+        .attr("y2", line_coordinate.y)
+        .attr("stroke","grey")
+        .attr("id", "graphie")
+        .style("stroke-dasharray", ("10,3"));
+      }
+    }
+  
+    //returns english titles
+    function getNameToShow(key) {
+      switch (key) {
+        case "school_lunches_percent_students_free_lunch": return("Free Lunch")
+        case "perpupil_spending": return("Per Pupil Spending")
+        case "adjusted_perpupil_spending": return("Adjusted Per Pupil Spending")
+        case "educational_attainment_bachelor_plus": return("College Grad")
+        case "educational_attainment_hs_plus": return("Highschool Grad")
+        case "per_pupil_salaries": return("Per Pupil Salaries")
+        case "avg_act_composite_score": return("ACT Scores")
+        case "average_sat_scores": return("SAT Scores")
+      }
+    }
+  
+  //setup ----------------------------------------------------------------------------------------------
+  var nested = d3.nest() // maybe not neccesary 
     .key(function(d) { return d.State;})
     .entries(dab);
 
-    // console.log(fuction(d) {return d.State;});
-
-  // What is the list of groups?
   allKeys = nested.map(function(d){return d.key})
 
   // Add an svg element for each group. They will be side by side and will go next row when no more room available
@@ -67,121 +129,176 @@ d3.csv('education.csv', function(dab) {
     .append("g")
       .attr("transform",
             "translate(" + margin.left + "," + margin.top + ")");
-    //   .text(function (d, i) {
-    //     console.log(d.values[0]["act_percent_students_tested"]/10); // the data element
-    //     // console.log(i); // the index element
-    //     // console.log(this); // the current DOM object
-    //     // return d.key;
-    // });
 
-  // calculates radial stuff? or just a normie scale
-  let radialScale = d3.scaleLinear()
-  .domain([0,10])
-  .range([0,50]);
-
-  // where are the rings
-  let ticks = [5, 10];
-
-  // draws rings
-  ticks.forEach(t =>
-  svg.append("circle")
-  .attr("cx", 100)
-  .attr("cy", 100)
-  .attr("fill", "none")
-  .attr("stroke", "gray")
-  .attr("r", radialScale(t))
-  );
-
-  // // have no use for now
-  // ticks.forEach(t =>
-  // svg.append("text")
-  // .attr("x", 305)
-  // .attr("y", 300 - radialScale(t))
-  // .text(t.toString())
-  // );
-
-  // calculates coordinate based on angle
-  function angleToCoordinate(angle, value){
-    let x = Math.cos(angle) * radialScale(value);
-    let y = Math.sin(angle) * radialScale(value);
-    return {"x": 100 + x, "y": 100 - y};
-  }
-
-  for (var i = 0; i < features.length; i++) {
-    // let ft_name = features[i];
-    let angle = (Math.PI / 2) + (2 * Math.PI * i / features.length);
-    let line_coordinate = angleToCoordinate(angle, 10);
-    // let label_coordinate = angleToCoordinate(angle, 10.5);
-
-    //draw axis line
-    svg.append("line")
-    .attr("x1", 100)
-    .attr("y1", 100)
-    .attr("x2", line_coordinate.x)
-    .attr("y2", line_coordinate.y)
-    .attr("stroke","black");
-
-    //draw axis label
-    // svg.append("text")
-    // .attr("x", label_coordinate.x)
-    // .attr("y", label_coordinate.y)
-    // .text(ft_name);
-  }
-
-  // some setup for special line ?
-  let line = d3.line()
-  .x(d => d.x)
-  .y(d => d.y);
-
-  let colors = ["darkorange", "gray", "navy"];
-
-  // calculates path coordinates
-  function getPathCoordinates(data_point){
-    let coordinates = [];
-    for (var i = 0; i < features.length; i++){
-        let ft_name = features[i];
-        let angle = (Math.PI / 2) + (2 * Math.PI * i / features.length);
-        coordinates.push(angleToCoordinate(angle, data_point[ft_name]));
-    }
-    return coordinates;
-  }
-
-  // iterate through the data and draw the vis
-  // for (var i = 0; i < data.length; i++){
-  //   let d = data[i];
-    console.log(dab[0]);
-
-    //draw the path element
-    svg.append("path")
-    // .text(function (d, i) {
-    //   console.log(d.values[0]["act_percent_students_tested"]/10); // the data element
-      // console.log(i); // the index element
-      // console.log(this); // the current DOM object
-      // return d.key;
-    // })
-    .datum(getPathCoordinates(data[0]))
-    // .datum(getPathCoordinates(function(d) {
-    //   console.log(d.values); // the data element
-    //   return (data[0]);
-    // }))
-    // .datum(getPathCoordinates(function(d) {
-    //   return (d[0]);
-    // })
-    .attr("d", line)
-    .attr("stroke-width", 3)
-    .attr("stroke", colors[0])
-    .attr("fill", colors[0])
-    .attr("stroke-opacity", 1)
-    .attr("opacity", 0.5);
-  // }
-
-  // Add titles
+  // sets up scale for the radars
+  let radarSizeScale = d3.scaleLinear()
+  .domain([0,1])
+  .range([0,6]);
+  
+  // draw all state titles
   svg
   .append("text")
   .attr("text-anchor", "start")
   .attr("y", 25)
   .attr("x", 10)
   .text(function(d){ return(d.key)})
-  // .style("fill", function(d){ return color(d.key) })
+
+  // whats this
+  let line = d3.line()
+  .x(d => d.x)
+  .y(d => d.y);
+
+  let colors = ["darkorange", "gray", "navy"];
+
+  //init ----------------------------------------------------------
+  scaleFeatures();
+  draw();
+
+  // ---------------------------------------------- legend
+  // select the svg area
+  var svggez = d3.select("#my_legend")
+  .append("svg")
+    .attr("width", 7 * (width + margin.left + margin.right))
+    .attr("height", 3 * height)
+  .append("g")
+    .attr("transform", "translate(" + 2.5 * (width + margin.left) + "," + 5 * margin.top + ")");
+
+  // title
+  svggez.append("text").attr("class", "title-font").attr("text-anchor", "start").attr("y", -80).attr("x", -500).text("Small Multiples").style("font", "30px times")
+  svggez.append("text").attr("text-anchor", "start").attr("y", -30).attr("x", -500).text("Radar Chart").style("font", "30px times")
+  
+  // name
+  svggez.append("text").attr("text-anchor", "start").attr("y", 40).attr("x", -500).text("Funding & Education").style("font", "30px times")
+  svggez.append("text").attr("text-anchor", "start").attr("y", 90).attr("x", -500).text(" by State").style("font", "30px times")
+  
+  // legend
+  svggez.append("text").attr("text-anchor", "start").attr("y", -80).attr("x", 50).text("Legend").style("font", "30px times")
+
+  // draws legend labels
+  function drawLegend(){
+    d3.selectAll("#legends").remove();
+    for (var i = 0; i < features.length; i++) {
+      let angle = (Math.PI / 2) + (2 * Math.PI * i / features.length);
+      let line_coordinate = angleToCoordinate(angle, 20);
+      let label_coordinate = angleToCoordinate(angle, 27);
+    
+      //draw axis line
+      svggez.append("line")
+      .attr("x1", 100)
+      .attr("y1", 100)
+      .attr("x2", line_coordinate.x)
+      .attr("y2", line_coordinate.y)
+      .attr("transform", "translate(" + 300 + "," + 0 + ")")
+      .attr("stroke","grey")
+      .attr("id", "legends")
+      .style("stroke-dasharray", ("10,3"));
+
+      //draw axis label
+      svggez.append("text")
+      .attr("x", label_coordinate.x + 300)
+      .attr("y", label_coordinate.y)
+      .attr("text-anchor", "middle")
+      .attr("id", "legends")
+      .text(getNameToShow(features[i]));
+    }
+  }
+
+  drawLegend();
+
+  //----------------------------------------------------------------- dropdown
+
+  // List of groups (here I have one group per column)
+  var allGroup = ["school_lunches_percent_students_free_lunch", "perpupil_spending", "adjusted_perpupil_spending", "educational_attainment_bachelor_plus", "educational_attainment_hs_plus" , "per_pupil_salaries", "avg_act_composite_score"];
+  var count = 5;
+
+  function yehaw() {
+      // add the options to the button
+  d3.select("#selectButton0").style("visibility", function() { return (count >= 1 ? "visible" : "hidden")}).selectAll('myOptions').data(allGroup).enter().append('option')
+    .text(function (d) { return getNameToShow(d); }) // text showed in the menu
+    .attr("value", function (d) { return d; }) // corresponding value returned by the button
+  d3.select("#selectButton1").style("visibility", function() { return (count >= 2 ? "visible" : "hidden")}).selectAll('myOptions').data(allGroup).enter().append('option')
+    .text(function (d) { return getNameToShow(d); }) // text showed in the menu
+    .attr("value", function (d) { return d; }) // corresponding value returned by the button
+  d3.select("#selectButton2").style("visibility", function() { return (count >= 3 ? "visible" : "hidden")}).selectAll('myOptions').data(allGroup).enter().append('option')
+    .text(function (d) { return getNameToShow(d); }) // text showed in the menu
+    .attr("value", function (d) { return d; }) // corresponding value returned by the button
+  d3.select("#selectButton3").style("visibility", function() { return (count >= 4 ? "visible" : "hidden")}).selectAll('myOptions').data(allGroup).enter().append('option')
+    .text(function (d) { return getNameToShow(d); }) // text showed in the menu
+    .attr("value", function (d) { return d; }) // corresponding value returned by the button
+  d3.select("#selectButton4").style("visibility", function() { return (count >= 5 ? "visible" : "hidden")}).selectAll('myOptions').data(allGroup).enter().append('option')
+    .text(function (d) { return getNameToShow(d); }) // text showed in the menu
+    .attr("value", function (d) { return d; }) // corresponding value returned by the button
+  d3.select("#selectButton5").style("visibility", function() { return (count >= 6 ? "visible" : "hidden")}).selectAll('myOptions').data(allGroup).enter().append('option')
+    .text(function (d) { return getNameToShow(d); }) // text showed in the menu
+    .attr("value", function (d) { return d; }) // corresponding value returned by the button
+    // .style("visibility", function() { return (count >= 6 ? "visible" : "hidden")})
+  }
+  yehaw();
+
+    
+  // When the button is changed, run the updateChart function
+  d3.select("#selectButton0").on("change", function(d) {
+      var selectedOption = d3.select(this).property("value")
+      update(selectedOption, 0)
+  })
+  d3.select("#selectButton1").on("change", function(d) {
+      var selectedOption = d3.select(this).property("value")
+      update(selectedOption, 1)
+  })
+  d3.select("#selectButton2").on("change", function(d) {
+      var selectedOption = d3.select(this).property("value")
+      update(selectedOption, 2)
+  })
+  d3.select("#selectButton3").on("change", function(d) {
+      var selectedOption = d3.select(this).property("value")
+      update(selectedOption, 3)
+  })
+  d3.select("#selectButton4").on("change", function(d) {
+      var selectedOption = d3.select(this).property("value")
+      update(selectedOption, 4)
+  })
+  d3.select("#selectButton5").on("change", function(d) {
+      var selectedOption = d3.select(this).property("value")
+      update(selectedOption, 5)
+  })
+
+    
+  // A function that update the chart
+  function update(selectedGroup, key) {
+
+    if(selectedGroup == "monk"){
+      features.pop();
+      console.log("yes")
+    } else {
+      features[key] = selectedGroup;
+    }
+
+
+    scaleFeatures();
+
+    draw()
+
+    drawLegend();
+  }
+
+  function monkA() {
+     if (count < 6) {
+      update("school_lunches_percent_students_free_lunch", count)
+       count++;
+       yehaw();
+     }
+     console.log("juice :" + count);
+   }
+  function monkB() {
+     if (count > 3) {
+       update("monk", count)
+       count--;
+       yehaw();
+     }
+     console.log("nojuice :" + count);
+   }
+  
+    document.getElementById("addBob").addEventListener("click", monkA);
+    document.getElementById("removeBob").addEventListener("click", monkB);
 
 })
