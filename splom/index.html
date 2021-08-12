@@ -16,33 +16,29 @@
                 <div>
                     <h2 class="legendtitle">Color Legend:</h2>
                 </div>
-                <div>
-                    <h3>national</h3>
-                    <span class="dot" style="background-color: #111111" onclick="regionselect('National')"></span>
+                <div class="legendregion">
+                    <h3 class="regiontext">northeast</h3>
+                    <span class="dots" id="NortheastDot" style="background-color: #5bc0de" onclick="regionselect('Northeast')"></span>
                 </div>
-                <div>
-                    <h3>northeast</h3>
-                    <span class="dot" style="background-color: #5bc0de" onclick="regionselect('Northeast')"></span>
+                <div class="legendregion">
+                    <h3 class="regiontext">south</h3>
+                    <span class="dots" id="SouthDot" style="background-color: #d9534f" onclick="regionselect('South')"></span>
                 </div>
-                <div>
-                    <h3>south</h3>
-                    <span class="dot" style="background-color: #d9534f" onclick="regionselect('South')"></span>
+                <div class="legendregion">
+                    <h3 class="regiontext">midwest</h3>
+                    <span class="dots" id="MidwestDot" style="background-color: #5cb85c" onclick="regionselect('Midwest')"></span>
                 </div>
-                <div>
-                    <h3>midwest</h3>
-                    <span class="dot" style="background-color: #5cb85c" onclick="regionselect('Midwest')"></span>
+                <div class="legendregion">
+                    <h3 class="regiontext">west</h3>
+                    <span class="dots" id="WestDot" style="background-color: #800080" onclick="regionselect('West')"></span>
                 </div>
-                <div>
-                    <h3>west</h3>
-                    <span class="dot" style="background-color: #800080" onclick="regionselect('West')"></span>
-                </div>
-                <div>
-                    <h3>reset</h3>
-                    <span class="dot" style="background-color: #d3d3d3" onclick="regionselect('Reset')"></span>
+                <div class="legendregion">
+                    <h3 class="regiontext">reset</h3>
+                    <span class="dots" id="ResetDot" style="background-color: #d3d3d3" onclick="regionselect('Reset')"></span>
                 </div>
             </div>
         </div>
-        <svg width="2500" height="2500" style="border: 1px solid #777;">
+        <svg class="canvas" id="svg" width="3000" height="3000">
         </svg>
     </div>
 </body>
