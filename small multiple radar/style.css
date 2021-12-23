@@ -83,7 +83,7 @@ circle:hover {
 }
 
 .d3-tip thead tr {
-  paddin-top: 10px;
+  padding-top: 10px;
 }
 
 body {
@@ -99,12 +99,22 @@ label {
     margin: 20px;
 }
 
-.title-font{
-  height: 100%;
-  padding: 0;
-  scroll-behavior: smooth;
-  background: #f7f5f2;
-  color: #666;
-  font-family: 'Open Sans', sans-serif;
-  font-weight: 300;
+.big-title-font{
+  font-family: 'Open Sans';
+  font-weight: bold;
+  font-size: 250%;
 }
+
+.small-title-font{
+  font-family: 'Open Sans';
+  font-size: 150%;
+}
+
+.legend-label-font{
+  font-family: 'Open Sans';
+  font-size: 75%;
+  text-align: middle;
+}
+
+
+
