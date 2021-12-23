@@ -5,6 +5,11 @@
 
 .axis line {
   stroke: #ddd;
+  stroke-dasharray: 147.22, 15;
+}
+
+.axis text {
+  fill: #222;
 }
 
 .axis path {
@@ -13,15 +18,19 @@
 
 .axis .axis-label {
   font-family: 'Montserrat', sans-serif;
-  font-size: 10px;
-  font-weight: 600;
+  font-size: 11px;
   text-anchor: middle;
-  fill: #222;
+  fill: #111;
 }
 
 .frame {
   fill: none;
   stroke: #aaa;
+}
+
+.canvas {
+  border: 1px solid #777;
+  background-color: #eefbfb;
 }
 
 circle {
@@ -52,7 +61,6 @@ circle:hover {
   box-sizing: border-box;
   display: inline;
   font-size: 10px;
-  width: 100%;
   line-height: 1;
   color: rgba(240, 240, 240, 0.95);
   content: "\25BC";
@@ -93,6 +101,15 @@ circle:hover {
   padding-top: 10px;
 }
 
+.legendbox {
+  border: 1px solid #777;
+  padding-top: 10px;
+  padding-left: 10px;
+  margin-bottom: 20px;
+  display: inline-block;
+  background-color: #eefbfb;
+}
+
 .legendtitle {
   font-family: 'Montserrat', sans-serif;
   color: #000;
@@ -104,7 +121,7 @@ circle:hover {
   font-size: 14px;
   color: #555;
   display: flex;
-  margin-right: 20px;
+  margin: auto;
 }
 
 .legend div {
@@ -112,12 +129,58 @@ circle:hover {
   min-width: 75px;
 }
 
-.dot {
+.regiontext {
+  display: inline-block;
+  position: relative;
+}
+
+.regiontext:after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  transform: scaleX(0);
+  height: 1px;
+  bottom: 0;
+  left: 0;
+  background-color: #777;
+  transform-origin: bottom right;
+  transition: transform 0.25s ease-out;
+}
+
+.legendregion:hover .regiontext:after {
+  transform: scaleX(1);
+  transform-origin: bottom left;
+}
+
+.dots {
   height: 25px;
   width: 25px;
   background-color: #bbb;
   border-radius: 50%;
+  border-style: solid;
+  border-width: 0.5px;
   display: inline-block;
+  animation: legendPopUp 2.5s ease-in-out;
+}
+
+#NortheastDot {
+  animation-delay:0s;
+}
+
+#SouthDot {
+  animation-delay:0.2s;
+}
+
+#MidwestDot {
+  animation-delay:0.4s;
+}
+
+#WestDot {
+  animation-delay:0.6s;
+}
+
+#ResetDot {
+  animation-delay:0.8s;
 }
 
 .legend h3 {
@@ -135,6 +198,7 @@ circle:hover {
 body {
     font-family: 'Montserrat', sans-serif;
     margin: 0;
+    background-image: url("./assets/america-dark.svg");
 }
 
 label {
@@ -143,4 +207,13 @@ label {
 
 #main {
     margin: 20px;
+}
+
+@keyframes legendPopUp {
+  0%{
+    transform: scale(0);
+  }
+  100%{
+    transform: scale(1);
+  }
 }
